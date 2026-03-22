@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <!--"StAuth10244: I Parneet Kaur, 000948530 certify that this material is my original work.
+     No other person's work has been used without due acknowledgement. I have not made my work available to anyone else."-->
+    <meta charset="UTF-8" />
+    <title>Hello World</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+
+    <!-- Don't use this in production: -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+      .app{
+        font-family:Arial, sans-serif;
+        text-align:center;
+        padding:20px;
+        background-color:bisque;
+        
+      }
+      .deck{
+        width:120px;
+        height:160px;
+        background:darkred;
+        color:white;
+        display:flex;
+        justify-content:center;
+        align-items:center;
+        border-radius:10px;
+        margin:20px auto;
+        cursor:pointer;
+
+        box-shadow:
+            4px 4px 0 #999,
+            8px 8px 0 #bbb;
+
+      
+      }
+      .deck-empty {
+        background: gray;
+        color: white;
+        width:120px;
+        height:160px;
+        display:flex;
+        justify-content:center;
+        text-align: center;
+        align-items:center;
+        border-radius:10px;
+        margin:20px auto;
+      }
+      
+      .card{
+        width:80px;
+        height:120px;
+        border:1px solid black;
+        display:inline-flex;
+        justify-content:center;
+        align-items:center;
+        margin:5px;
+        font-size:22px;
+        background:white;
+        cursor:pointer;
+        border-radius:8px;
+         box-shadow:
+            2px 2px 0 #999,
+            4px 4px 0 #bbb;
+
+      }
+      .selected{
+        border:4px solid blue;
+
+      }
+      .buttons{
+        display:flex;
+        justify-content:center;
+        gap:10px;
+        margin-bottom:20px;
+        
+      }
+
+
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="text/babel">
+      function Card({value,suit,selected,onClick}){
+        const color = (suit === "♥" || suit === "♦") ? "red" : "black";
+        return(
+            <div 
+            className={selected ? "card selected" : "card"}
+            onClick={onClick}
+            style={{color}} 
+            >
+                {value}{suit}
+            </div>
+        );
+      }
+      function CreateDeck(){
+        const suits = ["♠","♥","♦","♣"];
+        const values = ["A","2","3","4","5","6","7","8","9","10","J","Q","K"];
+        const deck = [];
+        for(let suit of suits){
+            for(let value of values){
+                deck.push({value,suit});
+            }
+        }
+        return deck;
+      }
+      function DrawCard(deck,cards,setDeck,setCards){
+
+        if(deck.length===0) return;
+
+        let index = Math.floor(Math.random()*deck.length);
+
+        let card = deck[index];
+
+        let newDeck = [...deck];
+        newDeck.splice(index,1);
+
+        setDeck(newDeck);
+        setCards([...cards,card]);
+      }
+      function selectCard(i,picked,cards,setCards,setPicked){
+          if(picked===null){
+            setPicked(i);
+          }else if(picked===i){
+            setPicked(null);
+          }else{
+            let newCards = [...cards];
+
+            let temp = newCards[picked];
+            newCards[picked] = newCards[i];
+            newCards[i] = temp;
+
+            setCards(newCards);
+            setPicked(null);
+          }
+
+        }
+      function Deal5(deck,cards,setDeck,setCards,setPicked){
+
+        let newDeck=[...deck,...cards];
+        for(let i = newDeck.length - 1; i > 0; i--){
+          const j = Math.floor(Math.random() * (i + 1));
+          [newDeck[i], newDeck[j]] = [newDeck[j], newDeck[i]]; 
+        }
+
+        setCards(newDeck.slice(0,5));
+        setDeck(newDeck.slice(5));
+        setPicked(null);
+
+      }
+      function Deal7(deck,cards,setDeck,setCards,setPicked){
+
+        let newDeck=[...deck,...cards];
+        for(let i = newDeck.length - 1; i > 0; i--){
+          const j = Math.floor(Math.random() * (i + 1));
+          [newDeck[i], newDeck[j]] = [newDeck[j], newDeck[i]]; 
+        }
+
+        setCards(newDeck.slice(0,7));
+        setDeck(newDeck.slice(7));
+        setPicked(null);
+
+      }
+      function Reset(deck,cards,setDeck,setCards){
+        let newDeck=[...deck,...cards];
+        setDeck(newDeck);
+        setCards([]);
+      }
+      function Toss(picked,deck,cards,setPicked,setDeck,setCards){
+        if(picked===null) return;
+         const newCards = cards.filter((_, index) => index !== picked);
+         setCards(newCards);
+          setPicked(null);
+      }
+      function WildCard(deck,cards,setDeck,setCards){
+       const suits = ["♠", "♥", "♦", "♣"];
+       const values = ["A","2","3","4","5","6","7","8","9","10","J","Q","K"];
+       const suit = suits[Math.floor(Math.random() * suits.length)];
+       const value = values[Math.floor(Math.random() * values.length)];
+        const newCard = {value, suit};
+        setCards([...cards, newCard]);
+
+
+      }
+      function Regroup(cards,setCards,setPicked){
+        let regroup=[...cards];
+        for(let i = regroup.length - 1; i > 0; i--){
+          const j = Math.floor(Math.random() * (i + 1));
+          [regroup[i], regroup[j]] = [regroup[j], regroup[i]]; 
+        }
+        setCards(regroup);
+        setPicked(null);
+      }
+
+      
+    
+      function MyApp() {
+        const [deck,setDeck] = React.useState(CreateDeck());
+        const [cards,setCards] = React.useState([]);
+        const [picked,setPicked] = React.useState(null);
+
+        return (
+          <div className="app">
+            <div 
+            className={deck.length === 0 ? "deck-empty" : "deck"}
+            onClick={() => DrawCard(deck, cards, setDeck, setCards)}>
+              {deck.length===0 ? "No Cards Remaining" : "Deck"}
+            </div>
+            <div className="buttons">
+              <button onClick={() => Deal5(deck, cards, setDeck, setCards, setPicked)}>Deal 5</button>
+              <button onClick={() => Deal7(deck, cards, setDeck, setCards, setPicked)}>Deal 7</button>
+              <button onClick={() => Reset(deck, cards, setDeck, setCards)}>Reset</button>
+              <button onClick={() => Toss(picked, deck, cards, setPicked, setDeck, setCards)}>Toss</button>
+              <button onClick={() => WildCard(deck, cards, setDeck, setCards)}>WildCard</button>
+              <button onClick={() => Regroup(cards, setCards, setPicked)}>Regroup</button>
+              </div>
+            <div>
+
+            {cards.map((card,i)=>(
+              <Card
+                key={i}
+                value={card.value}
+                suit={card.suit}
+                selected={picked === i}
+                onClick={() => selectCard(i,picked,cards,setCards,setPicked)}
+              />
+            ))}
+
+            </div>
+           
+
+          </div>
+        )
+
+      }
+
+      const container = document.getElementById('root');
+      const root = ReactDOM.createRoot(container);
+      root.render(<MyApp />);
+
+    </script>
+    <!--
+      Note: this page is a great way to try React but it's not suitable for production.
+      It slowly compiles JSX with Babel in the browser and uses a large development build of React.
+
+      Read this page for starting a new React project with JSX:
+      https://react.dev/learn/start-a-new-react-project
+
+      Read this page for adding React with JSX to an existing project:
+      https://react.dev/learn/add-react-to-an-existing-project
+    -->
+  </body>
+</html>
